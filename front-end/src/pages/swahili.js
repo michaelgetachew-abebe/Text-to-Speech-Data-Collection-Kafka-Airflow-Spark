@@ -1,9 +1,12 @@
 import React from 'react';
+import Body from '../components/Body/body';
+import Header from '../components/Header/header';
 
 const Swahili = () => {
 return (
 	<div>
-	<h1>Swahili Speech Collection</h1>
+		<Header Language='Swahili' LocalLanguage='Jukwaa la Kukusanya Data ya Maandishi ya Kiswahili hadi Usemi'/>
+		<Body />
 	</div>
 );
 };

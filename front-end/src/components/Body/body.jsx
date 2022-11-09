@@ -4,6 +4,7 @@ import useRecorder from "../hooks/useRecorder";
 
 import axios from 'axios'
 import React, { useState } from "react";
+import './body.css';
 
 const Body = () => {
   const [userData, setUserData] = useState({});
@@ -75,19 +76,10 @@ const Body = () => {
   }
   return (
     <>
-      {/* Get text */}
-{/* <<<<<<< HEAD
-      <div className="body-container">
-=======
-      
->>>>>>> 3339a4c00a0c69fc4935dc5e1da57b146a2972d1 */}
-      <div className="w3-container w3-border" id="">
+      <div className="body-container" id="">
         <head>
-          
-          {/* Adding W3.CSS file through external link  */}
           <link rel="stylesheet" href=
               "https://www.w3schools.com/w3css/4/w3.css"/>
-
         </head>
         <section>
           <form onClick={handleClick}>
@@ -98,8 +90,7 @@ const Body = () => {
         </section>
         <section>
           <div>
-          <button className="w3-button w3-padding-large"  onClick={handleShowRecordComponent}>UPLOAD</button>
-
+          <button className="w3-btn w3-round-large w3-padding-large w3-darkblue"  onClick={handleShowRecordComponent}>UPLOAD</button>
             <button className="w3-button w3-round-xxlarge w3-red 3-padding-large" onClick={handleShowSendComponent}>RECORD</button>
           </div>
           <div>
@@ -115,7 +106,7 @@ const Body = () => {
                   <div>
                     <form onSubmit={audioSubmit}>
                       <input type="file" onChange={handleChange} />
-                      <button classname = "w3-button w3-padding-large" type="submit">SUBMIT</button>
+                      <button classname = "w3-btn w3-round-large w3-padding-large w3-darkblue" type="submit">SUBMIT</button>
                     </form>
                   </div>
                   <section>
