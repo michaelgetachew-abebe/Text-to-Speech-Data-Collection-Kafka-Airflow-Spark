@@ -1,4 +1,4 @@
-import { formatMinutes, formatSeconds } from "../../utils/format-time";
+import { formatMinutes, formatSeconds } from "../utils/format-time";
 // import "./styles.css";
 
 export default function RecorderControls({ recorderState, handlers }) {

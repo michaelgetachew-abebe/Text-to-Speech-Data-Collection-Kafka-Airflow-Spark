@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useState } from "react";
 
-import useRecordingsList from "../../hooks/use-recordings-list";
+import useRecordingsList from "../hooks/useRecordingList";
 // import "./styles.css";
 
 export default function RecordingsList({ audio }) {

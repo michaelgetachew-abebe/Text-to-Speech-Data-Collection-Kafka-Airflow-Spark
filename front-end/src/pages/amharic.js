@@ -1,11 +1,12 @@
 import React from "react";
+import Header from "../components/Header/header"
+import Body from "../components/Body/body"
 
 const Amharic = () => {
 return (
 	<div>
-	<h1>
-		Amharic Speech Collection
-	</h1>
+		<Header />
+		<Body />
 	</div>
 );
 };
