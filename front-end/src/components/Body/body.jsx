@@ -1,10 +1,10 @@
-import RecorderControls from "../recorder-controls/";
+import RecorderControls from "../recorder-controls";
 import RecordingsList from "../recording-list/";
 import useRecorder from "../hooks/useRecorder";
 
-import axios from 'axios'
+import axios from "axios";
 import React, { useState } from "react";
-import './body.css';
+import classesp from "./body.css";
 
 const Body = () => {
   const [userData, setUserData] = useState({});
@@ -53,7 +53,7 @@ const Body = () => {
   }
   function audioSubmit(event) {
     event.preventDefault();
-    const url = "";
+    const url = "https://afri-speech-to-text.herokuapp.com/send-audio";
     const formData = new FormData();
     formData.append("file", file);
     formData.append("YourFile", file.name);
@@ -76,37 +76,35 @@ const Body = () => {
   }
   return (
     <>
-      <div className="body-container" id="">
-        <head>
-          <link rel="stylesheet" href=
-              "https://www.w3schools.com/w3css/4/w3.css"/>
-        </head>
+      {/* Get text */}
+      <div className="bodys section__margin" id="wgpt3">
         <section>
           <form onClick={handleClick}>
-            <div className="">
-              <button class="w3-btn w3-round-large w3-padding-large w3-darkblue"  type="click">START</button>
+            <div className="bodys-feature">
+              <button className="shh" type="click">START</button>
             </div>
           </form>
         </section>
         <section>
-          <div>
-          <button className="w3-btn w3-round-large w3-padding-large w3-darkblue"  onClick={handleShowRecordComponent}>UPLOAD</button>
-            <button className="w3-button w3-round-xxlarge w3-red 3-padding-large" onClick={handleShowSendComponent}>RECORD</button>
+          <div className="bodys-feature">
+          <button className="sh"  onClick={handleShowRecordComponent} >INSERT AUDIO FILE</button>
+
+            <button className="sh" onClick={handleShowSendComponent}>RECORD AUDIO</button>
           </div>
           <div>
-            <p className="">{userData.headline}</p>
+            <p className="res">{userData.headline}</p>
           </div>
         </section>
                 {/* Upload audio */}
                 <div>
           {componentToShow.record && (
             <div>
-              <div className="">
-                <div className="">
-                  <div>
+              <div className={classesp.container}>
+                <div className={classesp.upload}>
+                  <div className="bodys-feature">
                     <form onSubmit={audioSubmit}>
                       <input type="file" onChange={handleChange} />
-                      <button classname = "w3-btn w3-round-large w3-padding-large w3-darkblue" type="submit">SUBMIT</button>
+                      <button type="submit">SUBMIT</button>
                     </form>
                   </div>
                   <section>
@@ -120,10 +118,10 @@ const Body = () => {
 
         {componentToShow.send && (
           <div>
-            <div className="" />
-            <section className="">
+            <div className="bodys-div" />
+            <section className="voice-recorder">
             <h3>READOUT LOUD</h3>
-              <div className="">
+              <div className="recorder-container">
                 <RecorderControls
                   recorderState={recorderState}
                   handlers={handlers}
@@ -137,4 +135,5 @@ const Body = () => {
     </>
   );
 };
+
 export default Body;
