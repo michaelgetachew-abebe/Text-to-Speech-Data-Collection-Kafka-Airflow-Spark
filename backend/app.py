@@ -1,25 +1,69 @@
-from flask import Flask
+import logging
+import os
+from json import dumps, loads
+import uuid
+from flask import Flask, app, jsonify, request
+from flask_cors import CORS, cross_origin
+from kafka import KafkaConsumer, KafkaProducer
+import kafka
+from waitress import serve
 
 app = Flask(__name__)
+cors = CORS(app)
 
-# Members API Route
+TEXT = "spark-transformed-text"
+TEXT_AUDIO = "text.audio.pair"
+BROKER_ADDRESS = 'localhost:29092'
 
-@app.route("/members")
-def members():
-    return {"data":
-                [
-                {"id": "14e06377-62ea-4d3d-be34-76cd6aa6a737",
-                "headline": "ድርጅቱ ከባንኮች ጋር መሥራቱ አስተማማኝ የክፍያ ሥርዓት እንዲፈጠር አስችሏል",
-                "article":
-                "የኢትዮጵያ የምርት ገበያ ድርጅት ከባንኮች ጋር\xa0 በጋራ በመስራቱ በተገበያዮች ላይ የክፍያ መተማመን እንዲፈጠር ማስቻሉን አስታውቋል፡፡ምርት\xa0 ገበያው ከአሁን ቀደም ከአስር ባንኮች ጋር በጋር በመስራቱ ላለፉት ዘጠኝ ዓመታት\xa0 በሚያከናውነው የግብይት ሂደት ላይ \xa0መተማመንን \xa0የፈጠረ የክፍያ ሥርዓት እንዲኖር አስችሏል ብሏል፡፡በዛሬው ዕለት ምርት ገበያው ከብርሃን ኢንተርናሽናል ባንክ ጋር በጋር\xa0 ለመስራት የሚያስችለውን ስምምነት ተፈራርሟል፡፡የአሁኑን ስምምነት ተከትሎ ምርት ገበያው ደንበኞቹ በአስራ አንድ ባንኮች የክፍያ አገልግሎት መፈጸም\xa0 እንዲችሉ የሚያደርግ ነው፡፡በአሁኑ ወቅት ድርጅቱ በዘጠኝ የሀገሪቱ አካባቢዎች እየገነባቸው ባሉ የግብይት መፈፀሚያ ማዕከላት ሻጭና አቅራቢዎች የክፍያ አገልግሎት እንዲፈጽሙ የሚያስችል ነው ብለዋል ዋና ስራ አስፈፃሚው አቶ ኤርሚያስ እሸቱ፡፡\xa0",
-                "audio": "../data/test_amharic.wav"},
-                {"id": "a658979e-8642-4fa4-9fc6-5d48286d6dc4",
-                "headline": "ወልዋሎ የአራት ተጫዋቾች ዝውውር አጠናቀቀ",
-                "article":
-                "በዝውውሩ በስፋት እየተሳተፉ የሚገኙት ወልዋሎዎች ከወር በፊት ቀድመው የተስማሙት ኢታሙና ኬይሙኔ ፣ ዓይናለም ኃይሉ ፣ ኬኔዲ አሺያ እና ጆናስ ሎሎን አስፈርመዋል።የእግር ኳስ ህይቱ በተወለደበት ከተማ ዓዲግራት ጀምሮ ሃገሩን ለማገልገል ወደ መከላከያ ሰራዊት ባቀናበት ወቅት ባሳየው ጥሩ አቋም ባህር ዳር ዩኒቨርሲቲ ቀጥሎም መከላከያን የተቀላቀለው  ተከላካዩ ዓይናለም ኃይለ ከዚህ ቀደም ለደደቢት፣ ዳሽን ቢራ፣ ፋሲል ከነማ እንዲሁም ለኢትዮጵያ ብሄራዊ ቡድን መጫወቱ ይታወሳል።ሌሎች ወልዋሎ የተቀላቀሉት ናሚቢያዊያኑ ኢታሙና ኬይሙኔ እና ጆናስ ሎሎ ናቸው። ኢታሙና ባለፈው ዓመት ከብርቱካናማዎቹ ጋር የተሳካ ቆይታ የነበረው ተጫዋች ሲሆን በግብፁ የአፍሪካ ዋንጫም ተሳታፊ እንደነበር ይታወሳል። ሌላው አዲስ የቢጫ ለባሾቹ ፈራሚ ጆናስ ሎሎ ሲሆን ከኢታሙና ቀጥሎ በፕሪምየር ሊጉ የተጫወተ ሁለተኛው ናሚቢያዊ እንደሚሆን ይጠበቃል።አራተኛው የወልዋሎ ፈራሚ ከዚ በፊት በሲዳማ ቡና ቆይታ የነበረው ኬኔዲ አሺያ ነው። ተጫዋቹ በወቅቱ ከፍተኛ ክፍያ በ2009 ክረምት ክለቡን ቢቀላቀልም ብዙም ሳይቆይ መለያየቱ ይታወሳል።ቡድኑን በአዲስ መልክ እያዋቀረ የሚገኘው ወልዋሎ እስካሁን 13 ተጫዋቾች አስፈርሟል።",
-                "audio": "../data/test_amharic.wav"}
-                ]
-            }
+try:
+        producer = KafkaProducer(bootstrap_servers=BROKER_ADDRESS,
+                                 value_serializer=lambda x: dumps(x).encode('utf-8'))
+        consumer = KafkaConsumer(TEXT,
+                                 bootstrap_servers=BROKER_ADDRESS,
+                                 auto_offset_reset='earliest',
+                                 enable_auto_commit=False,
+                                 value_deserializer=lambda x: loads(x.decode('utf-8')))
+except kafka.errors.NoBrokersAvailable:
+        print("NoBrokersAvailable")
+@app.route('/')
+
+def hello():
+    return '<h1>Successfully Dockerized Flask</h2>'
+
+@app.route('/get-text', methods=["GET"])
+def generate_text():
+        print("sending text")
+        try:
+            for s in consumer:
+                print(s.value)
+                article = s.value
+                return jsonify(text=article)
+        except NameError:
+            print("Consumer not init")
+            return 404
+
+@app.route('/send-audio', methods=["POST"])
+def post_recording():
+        audio = request.files['audio']
+        article = audio.filename
+        #audio = extract_audio(audio)
+        print(audio.shape)
+        audio = audio.tolist()
+        id = uuid.uuid1()
+        data = {
+            "id": id,
+            "article": article,
+            "audio": audio
+        }
+        try:
+            res = producer.send(TEXT_AUDIO, value=data)
+            print(res)
+        except NameError:
+            print("Producer not created")
+
+        # pprint(data)
+
+        return "200"
 
 if __name__ == "__main__":
     app.run(debug=True)
